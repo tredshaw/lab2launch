@@ -1,14 +1,19 @@
-import React from 'react'
 import TopNav from '../components/TopNav'
+import Ticker from '../components/Ticker'
 import Footer from '../components/Footer'
+import Hero from '../sections/Hero'
+import { landing } from '../content/landing'
 
-// Sections are imported here once built — enabled: false removes them safely
-const SECTIONS: { id: string; enabled: boolean; Component: () => React.ReactElement }[] = []
+// Add sections here as they're built. enabled: false removes silently.
+const SECTIONS = [
+  { id: 'hero', enabled: true, Component: Hero },
+]
 
 export default function Landing() {
   return (
     <>
       <TopNav />
+      <Ticker items={landing.ticker.items} speed={landing.ticker.speed} />
       <main>
         {SECTIONS.filter(s => s.enabled).map(({ id, Component }) => (
           <Component key={id} />
