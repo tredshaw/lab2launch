@@ -1,3 +1,4 @@
+import './form.css'
 import TopNav from '../components/TopNav'
 import Button from '../components/Button'
 import { useWizard } from '../hooks/useWizard'
@@ -377,56 +378,6 @@ export default function Form() {
         </div>
       </div>
 
-      <style>{`
-        .analyse-shell {
-          display: grid;
-          grid-template-columns: 220px 1fr;
-          gap: 64px;
-          max-width: 1100px;
-          margin: 0 auto;
-          padding: 64px 32px 96px;
-        }
-        .analyse-side { position: sticky; top: 100px; align-self: start; }
-        .analyse-progress { display: flex; flex-direction: column; gap: 0; border-left: 1px solid var(--hairline); margin-top: 16px; }
-        .analyse-step {
-          display: grid; grid-template-columns: 32px 1fr; gap: 12px; align-items: start;
-          padding: 12px 0 12px 16px;
-          border-left: 2px solid transparent; margin-left: -1px;
-        }
-        .analyse-step.active { border-left-color: var(--ink); }
-        [data-theme="dark"] .analyse-step.active { border-left-color: var(--signal); }
-        .analyse-step-num {
-          font-family: var(--mono); font-size: 11px;
-          width: 24px; height: 24px; border-radius: 50%;
-          display: inline-flex; align-items: center; justify-content: center;
-          background: var(--bg-2); color: var(--muted); font-weight: 600;
-        }
-        .analyse-step.active .analyse-step-num { background: var(--ink); color: var(--bg); }
-        [data-theme="dark"] .analyse-step.active .analyse-step-num { background: var(--signal); color: var(--signal-ink); }
-        .analyse-step.done .analyse-step-num { background: var(--signal); color: var(--signal-ink); }
-        .analyse-step-label { font-size: 13px; color: var(--muted); padding-top: 3px; }
-        .analyse-step.active .analyse-step-label { color: var(--ink); font-weight: 500; }
-        .form-nav { display: flex; justify-content: space-between; padding-top: 32px; border-top: 1px solid var(--hairline); margin-top: 32px; }
-        .stage-track { display: flex; gap: 4px; }
-        .stage-pill { flex: 1; padding: 10px 6px; border: 1px solid var(--hairline); border-radius: var(--r-1); background: var(--surface); cursor: pointer; transition: all 0.15s; text-align: center; }
-        .stage-pill.selected { border-color: var(--ink); background: var(--bg-2); }
-        [data-theme="dark"] .stage-pill.selected { border-color: var(--signal); }
-        .stage-pill-l { font-family: var(--mono); font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-        .stage-pill-v { font-size: 12px; color: var(--ink); margin-top: 4px; font-weight: 500; }
-        .goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .goal-pill { padding: 16px; border: 1px solid var(--hairline); border-radius: var(--r-2); background: var(--surface); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px; transition: all 0.15s; }
-        .goal-pill:hover { border-color: var(--ink); }
-        .goal-pill.selected { border-color: var(--ink); background: var(--bg-2); }
-        [data-theme="dark"] .goal-pill.selected { border-color: var(--signal); background: var(--signal-soft); }
-        .gp-l { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-        .gp-t { font-size: 14px; color: var(--ink); font-weight: 500; }
-        @media (max-width: 900px) {
-          .analyse-shell { grid-template-columns: 1fr !important; }
-          .analyse-side { position: static !important; display: none; }
-          .stage-track { flex-wrap: wrap; }
-          .goal-grid { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
     </>
   )
 }
