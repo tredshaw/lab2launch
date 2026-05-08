@@ -71,7 +71,7 @@ function DimCard({ name, dim }: { name: string; dim: Dimension }) {
     }}>
       <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 24 }}>
         <div style={{ flex: 1 }}>
-          <span className="t-mono" style={{ display: 'block', marginBottom: 6 }}>{DIM_LABELS[name]}</span>
+          <span style={{ display: 'block', marginBottom: 8, fontFamily: 'var(--sans)', fontSize: 15, fontWeight: 700, color: 'var(--ink)', letterSpacing: 0 }}>{DIM_LABELS[name]}</span>
           <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.5 }}>{dim.justification}</p>
         </div>
         <div style={{ textAlign: 'right', flexShrink: 0 }}>
