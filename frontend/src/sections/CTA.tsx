@@ -6,7 +6,7 @@ export default function CTA() {
 
   return (
     <section style={{ padding: '0 32px', margin: '96px auto', maxWidth: 1280 }}>
-      <div style={{
+      <div data-cta-inner style={{
         background: 'var(--ink)',
         color: 'var(--bg)',
         borderRadius: 'var(--r-4)',

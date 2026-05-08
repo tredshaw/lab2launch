@@ -69,10 +69,39 @@ The researcher never sees these frameworks. They answer questions. The framework
 
 | Component | Choice |
 |---|---|
-| Backend | Python + FastAPI |
-| Frontend | Single HTML file + Vanilla JS + Tailwind CSS (CDN) |
-| LLM | Anthropic Claude claude-sonnet-4-6 |
+| Backend | Python 3.9 + FastAPI + Uvicorn |
+| Frontend | React 18 + Vite 5 + TypeScript (strict) |
+| LLM | Anthropic Claude API (haiku first pass, haiku/sonnet final) |
+| PDF | fpdf2 |
+| DB | SQLAlchemy + SQLite |
 | Deployment | Railway / Render |
+
+---
+
+## Running locally
+
+**Backend:**
+```bash
+cd backend
+./start.sh
+# FastAPI at http://127.0.0.1:8000
+# Requires ANTHROPIC_API_KEY in .env at repo root
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm run dev
+# Vite dev server at http://localhost:5173
+# Proxies /first-pass, /final-analysis, /download-pdf → localhost:8000
+```
+
+**Production build:**
+```bash
+cd frontend && npm run build
+# Output in frontend/dist/ (~89KB gzipped)
+```
 
 ---
 
