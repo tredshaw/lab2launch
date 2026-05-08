@@ -6,7 +6,7 @@ interface ActBullet {
 }
 
 interface ActCardProps {
-  letter: 'D' | 'A' | 'E'
+  letter: string
   number: string
   title: ReactNode
   body: string
@@ -19,8 +19,8 @@ export default function ActCard({ letter, number, title, body, bullets, featured
     <div
       className={`act-card${featured ? ' act-card--featured' : ''}`}
       style={{
-        background: featured ? 'var(--ink)' : 'var(--surface)',
-        color: featured ? 'var(--bg)' : 'var(--ink)',
+        background: featured ? '#0A1320' : 'var(--surface)',
+        color: featured ? '#F4F1EA' : 'var(--ink)',
         border: featured ? 'none' : '1px solid var(--hairline)',
         borderRadius: 'var(--r-3)',
         padding: 32,

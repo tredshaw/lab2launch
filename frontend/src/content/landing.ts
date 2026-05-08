@@ -86,8 +86,8 @@ export const landing = {
     description: 'Lab²Launch runs your inputs through BA frameworks — POPIT, SWOT, Stakeholder — and surfaces the gaps investors will find before they do.',
     acts: [
       {
-        letter: 'D' as const,
-        number: 'Act D · Stress test',
+        letter: '1',
+        number: 'Act 1 · Stress test',
         title: 'Five adversarial questions',
         body: "You answer the questions every investor will ask. No softening, no scaffolding. We score your answers across five POPIT dimensions.",
         bullets: [
@@ -99,8 +99,8 @@ export const landing = {
         ],
       },
       {
-        letter: 'A' as const,
-        number: 'Act A · Analysis',
+        letter: '2',
+        number: 'Act 2 · Analysis',
         title: 'Claude scores the gaps',
         body: "Our Claude-powered analysis engine scores your readiness across five dimensions. It identifies your strongest assets and names the specific gaps investors will press on.",
         bullets: [
@@ -113,8 +113,8 @@ export const landing = {
         featured: true,
       },
       {
-        letter: 'E' as const,
-        number: 'Act E · Execution',
+        letter: '3',
+        number: 'Act 3 · Execution',
         title: 'Three sequenced actions',
         body: "You leave with a prioritised action list. Not generic advice — specific, testable steps ranked by investor impact, with a first action for this week.",
         bullets: [
