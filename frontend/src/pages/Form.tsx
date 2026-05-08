@@ -1,4 +1,5 @@
 import './form.css'
+import { useNavigate } from 'react-router-dom'
 import TopNav from '../components/TopNav'
 import Button from '../components/Button'
 import { useWizard } from '../hooks/useWizard'
@@ -39,6 +40,7 @@ function StepSidebar({ step, total }: { step: number; total: number }) {
 export default function Form() {
   const wizard = useWizard()
   const { step, phase, formData, setField, next, prev, update, totalSteps } = wizard
+  const navigate = useNavigate()
 
   const submitFirstPass = async () => {
     update({ phase: 'running', error: null })
@@ -91,7 +93,8 @@ export default function Form() {
         }),
       })
       if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`)
-      update({ phase: 'done' })
+      const data = await res.json()
+      navigate(`/results/${data.analysis_id}`)
     } catch (e) {
       update({ phase: 'followup', error: (e as Error).message })
     }
