@@ -7,6 +7,9 @@ import Problem from '../sections/Problem'
 import ThreeActs from '../sections/ThreeActs'
 import AnatomyOfGap from '../sections/AnatomyOfGap'
 import LiveReportSection from '../sections/LiveReportSection'
+import PopitSection from '../sections/PopitSection'
+import WhoSection from '../sections/WhoSection'
+import CTA from '../sections/CTA'
 import { landing } from '../content/landing'
 
 // enabled: false removes a section silently — reorder array to reorder page
@@ -16,6 +19,9 @@ const SECTIONS = [
   { id: 'three-acts',   enabled: true, Component: ThreeActs },
   { id: 'anatomy',      enabled: true, Component: AnatomyOfGap },
   { id: 'live-report',  enabled: true, Component: LiveReportSection },
+  { id: 'popit',        enabled: true, Component: PopitSection },
+  { id: 'who',          enabled: true, Component: WhoSection },
+  { id: 'cta',          enabled: true, Component: CTA },
 ]
 
 export default function Landing() {
