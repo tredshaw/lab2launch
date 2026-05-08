@@ -129,7 +129,7 @@ export default function RadarChart({
             </text>
           )
         })}
-        <text x={cx} y={cy - 4} textAnchor="middle" fontFamily="var(--mono)" fontSize="9" letterSpacing="1.5" fill="var(--muted)">Σ</text>
+        <text x={cx} y={cy - 4} textAnchor="middle" fontFamily="var(--mono)" fontSize="9" letterSpacing="1.5" fill="var(--muted)">Δ</text>
       </svg>
     </div>
   )

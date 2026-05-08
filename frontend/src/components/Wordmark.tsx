@@ -6,7 +6,7 @@ interface WordmarkProps {
 export default function Wordmark({ size = 'md', className = '' }: WordmarkProps) {
   return (
     <span className={`wm wm-${size} ${className}`} aria-label="Lab2Launch">
-      Lab<span className="two" style={{ fontSize: '0.82em', position: 'relative', top: '-0.25em' }}>2</span>Launch
+      Lab<span className="two" style={{ fontStyle: 'normal', fontSize: '1em', letterSpacing: 0 }}>[2]</span>Launch
     </span>
   )
 }
