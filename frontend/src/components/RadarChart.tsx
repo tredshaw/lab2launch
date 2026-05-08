@@ -51,7 +51,7 @@ export default function RadarChart({
     <div
       ref={animateOnScroll ? (ref as React.RefObject<HTMLDivElement>) : undefined}
       className="radar-svg-wrap"
-      style={{ display: 'flex', justifyContent: 'center' }}
+      style={{ display: 'flex', justifyContent: 'center', padding: '0 40px' }}
     >
       <style>{`
         .radar-svg-wrap .radar-area {
@@ -74,7 +74,7 @@ export default function RadarChart({
           }
         `).join('')}
       `}</style>
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} overflow="visible">
         {[0.25, 0.5, 0.75, 1].map(ratio => (
           <polygon
             key={ratio}

@@ -16,7 +16,7 @@ export default function SigmaSymbol({ size = 32, color, stroke = 2.4 }: SigmaSym
       aria-hidden="true"
     >
       <path
-        d="M5 4 H27 L18 16 L27 28 H5"
+        d="M5 4 H27 L7 16 L27 28 H5"
         stroke={c}
         strokeWidth={stroke}
         strokeLinejoin="miter"

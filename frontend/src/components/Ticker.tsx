@@ -20,7 +20,7 @@ export default function Ticker({ items, speed = 60 }: TickerProps) {
       style={{
         overflow: 'hidden',
         borderBottom: '1px solid var(--hairline)',
-        background: 'var(--ink)',
+        background: 'var(--bg-2)',
       }}
     >
       <div
