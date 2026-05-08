@@ -58,39 +58,49 @@ const PRIORITY_VARIANT: Record<string, 'coral' | 'amber' | 'teal'> = {
   High: 'coral', Medium: 'amber', Low: 'teal',
 }
 
+const ASSET_VARIANTS: Array<'signal' | 'teal' | 'amber' | 'coral'> = ['signal', 'teal', 'amber', 'coral']
+
 function DimCard({ name, dim }: { name: string; dim: Dimension }) {
   return (
-    <div style={{ border: '1px solid var(--hairline)', borderRadius: 'var(--r-3)', overflow: 'hidden' }}>
-      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <span className="t-mono" style={{ display: 'block', marginBottom: 4 }}>{DIM_LABELS[name]}</span>
-          <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic' }}>{dim.justification}</p>
+    <div style={{
+      background: 'var(--surface)',
+      border: '1px solid var(--hairline)',
+      borderRadius: 'var(--r-3)',
+      overflow: 'hidden',
+      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    }}>
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--hairline)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 24 }}>
+        <div style={{ flex: 1 }}>
+          <span className="t-mono" style={{ display: 'block', marginBottom: 6 }}>{DIM_LABELS[name]}</span>
+          <p style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', lineHeight: 1.5 }}>{dim.justification}</p>
         </div>
-        <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 24 }}>
-          <span style={{ fontFamily: 'var(--serif)', fontSize: 40, lineHeight: 1 }}>{dim.score}</span>
-          <span className="t-mono" style={{ fontSize: 9 }}>/10</span>
-          <div style={{ marginTop: 6 }}>
-            <Tag variant={PRIORITY_VARIANT[dim.priority]}>{dim.priority} priority</Tag>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, justifyContent: 'flex-end', marginBottom: 8 }}>
+            <span style={{ fontFamily: 'var(--serif)', fontSize: 40, lineHeight: 1 }}>{dim.score}</span>
+            <span className="t-mono" style={{ fontSize: 9 }}>/10</span>
           </div>
+          <Tag variant={PRIORITY_VARIANT[dim.priority]}>{dim.priority} priority</Tag>
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '1px solid var(--hairline)' }}>
         {(['now', 'target', 'gap'] as const).map((col, i) => (
           <div key={col} style={{ padding: '16px 20px', borderLeft: i > 0 ? '1px solid var(--hairline)' : undefined }}>
-            <span className="t-mono" style={{ display: 'block', marginBottom: 8, fontSize: 9 }}>{col === 'now' ? 'Current state' : col === 'target' ? 'Target state' : 'The gap'}</span>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span className="t-mono" style={{ display: 'block', marginBottom: 10, fontSize: 9 }}>
+              {col === 'now' ? 'Current state' : col === 'target' ? 'Target state' : 'The gap'}
+            </span>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {dim[col].map((b, j) => (
-                <li key={j} style={{ fontSize: 12, lineHeight: 1.5, color: 'var(--ink-2)', display: 'flex', gap: 6 }}>
-                  <span style={{ color: 'var(--muted)', flexShrink: 0 }}>·</span>{b}
+                <li key={j} style={{ fontSize: 12, lineHeight: 1.55, color: 'var(--ink-2)', display: 'flex', gap: 8 }}>
+                  <span style={{ color: 'var(--muted)', flexShrink: 0, marginTop: 1 }}>·</span>{b}
                 </li>
               ))}
             </ul>
           </div>
         ))}
       </div>
-      <div style={{ padding: '16px 24px', background: 'var(--bg-2)' }}>
-        <span className="t-mono" style={{ display: 'inline', marginRight: 8, fontSize: 9 }}>Action</span>
-        <span style={{ fontSize: 13, color: 'var(--ink)' }}>{dim.action}</span>
+      <div style={{ padding: '14px 24px', background: 'var(--bg-2)', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <span className="t-mono" style={{ fontSize: 9, flexShrink: 0, paddingTop: 2 }}>Action</span>
+        <span style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.5 }}>{dim.action}</span>
       </div>
     </div>
   )
@@ -142,45 +152,68 @@ export default function Results() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 48, alignItems: 'start', marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid var(--hairline)' }}>
           <div>
             <span className="t-mono" style={{ display: 'block', marginBottom: 8 }}>Gap analysis report</span>
-            <h1 className="t-h2" style={{ marginBottom: 8 }}>{analysis.project_name || 'Untitled project'}</h1>
-            <p className="t-body" style={{ maxWidth: 560 }}>{r.plain_english_summary}</p>
+            <h1 className="t-h2" style={{ marginBottom: 12 }}>{analysis.project_name || 'Untitled project'}</h1>
+            <p className="t-body" style={{ maxWidth: 580 }}>{r.plain_english_summary}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
             <span className="t-mono" style={{ display: 'block', marginBottom: 4 }}>Readiness score</span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, justifyContent: 'flex-end', marginBottom: 8 }}>
               <span style={{ fontFamily: 'var(--serif)', fontSize: 64, lineHeight: 1 }}>{r.total_score}</span>
               <span className="t-mono">/50</span>
             </div>
-            <span style={{ marginTop: 8, display: 'inline-block' }}><Tag variant="teal">{r.stage_label}</Tag></span>
+            <Tag variant="teal">{r.stage_label}</Tag>
           </div>
         </div>
 
-        {/* Radar + top actions */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 48 }}>
-          <div>
-            <span className="t-mono" style={{ display: 'block', marginBottom: 16 }}>Dimension scores</span>
-            <RadarChart scores={radarScores} size={300} lowestThreshold={3} />
-          </div>
-          <div>
-            <span className="t-mono" style={{ display: 'block', marginBottom: 16 }}>Top 3 actions</span>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {r.top_3_actions.map((a, i) => (
-                <div key={i} style={{ border: '1px solid var(--hairline)', borderRadius: 'var(--r-2)', padding: '16px 20px' }}>
-                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 8 }}>
-                    <span style={{ fontFamily: 'var(--mono)', fontSize: 10, background: 'var(--signal)', color: 'var(--signal-ink)', padding: '2px 6px', borderRadius: 3, flexShrink: 0 }}>{a.rank}</span>
-                    <strong style={{ fontSize: 14 }}>{a.headline}</strong>
+        {/* Radar — centred, large */}
+        <div style={{ marginBottom: 48, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span className="t-mono" style={{ display: 'block', marginBottom: 20, alignSelf: 'flex-start' }}>Dimension scores</span>
+          <RadarChart scores={radarScores} size={380} lowestThreshold={3} />
+        </div>
+
+        {/* Top 3 actions — below radar, 3 columns */}
+        <div style={{ marginBottom: 56 }}>
+          <span className="t-mono" style={{ display: 'block', marginBottom: 20 }}>Top 3 actions</span>
+          <div className="actions-grid">
+            {r.top_3_actions.map((a, i) => (
+              <div key={i} style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--hairline)',
+                borderRadius: 'var(--r-3)',
+                overflow: 'hidden',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}>
+                <div style={{ padding: '20px 20px 16px' }}>
+                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
+                    <span style={{
+                      fontFamily: 'var(--mono)', fontSize: 10,
+                      background: 'var(--signal)', color: 'var(--signal-ink)',
+                      padding: '2px 7px', borderRadius: 3, flexShrink: 0, fontWeight: 700,
+                    }}>{a.rank}</span>
+                    <strong style={{ fontSize: 14, lineHeight: 1.4 }}>{a.headline}</strong>
                   </div>
-                  <p style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4, paddingLeft: 30 }}>{a.deliverable}</p>
-                  <p style={{ fontSize: 11, color: 'var(--signal-ink)', background: 'var(--signal-soft)', padding: '4px 8px', borderRadius: 3, display: 'inline-block', marginLeft: 30, fontFamily: 'var(--mono)', letterSpacing: '0.08em' }}>This week: {a.first_step}</p>
+                  <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.55 }}>{a.deliverable}</p>
                 </div>
-              ))}
-            </div>
+                <div style={{
+                  margin: '0 20px 20px',
+                  padding: '12px 14px',
+                  background: 'var(--bg-2)',
+                  borderRadius: 'var(--r-1)',
+                  borderLeft: '3px solid var(--signal)',
+                }}>
+                  <span className="t-mono" style={{ display: 'block', marginBottom: 4, fontSize: 9 }}>This week</span>
+                  <p style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.55 }}>{a.first_step}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Dimension cards */}
         <span className="t-mono" style={{ display: 'block', marginBottom: 16 }}>Five dimensions</span>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 48 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 56 }}>
           {dimKeys.map(k => <DimCard key={k} name={k} dim={r.dimensions[k]} />)}
         </div>
 
@@ -190,19 +223,28 @@ export default function Results() {
             <span className="t-mono" style={{ display: 'block', marginBottom: 16 }}>Your assets</span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
               {r.assets.map((a, i) => (
-                <div key={i} style={{ border: '1px solid var(--hairline)', borderRadius: 'var(--r-2)', padding: '16px 20px' }}>
-                  <strong style={{ fontSize: 14, display: 'block', marginBottom: 6 }}>{a.asset}</strong>
-                  <p style={{ fontSize: 12, color: 'var(--muted)' }}>{a.why_it_matters}</p>
+                <div key={i} style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--hairline)',
+                  borderRadius: 'var(--r-2)',
+                  padding: '16px 20px',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+                }}>
+                  <div style={{ marginBottom: 10 }}>
+                    <Tag variant={ASSET_VARIANTS[i % ASSET_VARIANTS.length]}>Asset {i + 1}</Tag>
+                  </div>
+                  <strong style={{ fontSize: 14, display: 'block', marginBottom: 8, lineHeight: 1.4 }}>{a.asset}</strong>
+                  <p style={{ fontSize: 12, color: 'var(--muted)', lineHeight: 1.55 }}>{a.why_it_matters}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Footer actions */}
+        {/* Footer */}
         <div style={{ display: 'flex', gap: 12, paddingTop: 32, borderTop: '1px solid var(--hairline)' }}>
           <a
-            href={`/download-pdf?analysis_id=${id}`}
+            href="#download"
             className="btn btn-primary"
             onClick={async e => {
               e.preventDefault()
@@ -213,8 +255,8 @@ export default function Results() {
               })
               const blob = await res.blob()
               const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url; a.download = `${analysis.project_name || 'report'}.pdf`; a.click()
+              const el = document.createElement('a')
+              el.href = url; el.download = `${analysis.project_name || 'report'}.pdf`; el.click()
               URL.revokeObjectURL(url)
             }}
           >
@@ -226,9 +268,14 @@ export default function Results() {
 
       </div>
       <style>{`
+        .actions-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+          align-items: start;
+        }
         @media (max-width: 900px) {
-          .results-header { grid-template-columns: 1fr !important; }
-          .results-mid { grid-template-columns: 1fr !important; }
+          .actions-grid { grid-template-columns: 1fr !important; }
           .dim-cols { grid-template-columns: 1fr !important; }
         }
       `}</style>
