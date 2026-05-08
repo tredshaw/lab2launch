@@ -24,6 +24,15 @@ _VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
 app = FastAPI(title="Lab2Launch", version=_VERSION)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # ---------------------------------------------------------------------------
 # In-memory session store — keyed by UUID, expires after 30 minutes
 # ---------------------------------------------------------------------------
