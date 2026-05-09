@@ -2,6 +2,8 @@ fastapi
 uvicorn[standard]
 python-dotenv
 anthropic
-fpdf2
-sqlalchemy
 weasyprint
+jinja2
+itsdangerous
+resend
+python-multipart

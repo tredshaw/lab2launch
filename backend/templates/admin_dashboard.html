@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lab2Launch · Admin</title>
+<style>{% include "admin.css" %}</style>
+</head>
+<body>
+<header class="dash-head">
+  <div>
+    <span class="eyebrow">Lab2Launch</span>
+    <h1>Operations</h1>
+    <p class="muted">Live in-memory metrics. Resets on server restart.</p>
+  </div>
+  <form method="post" action="/admin/logout" class="logout-form">
+    <button type="submit" class="btn-ghost">Log out</button>
+  </form>
+</header>
+
+<main class="dash">
+
+<section class="grid grid-4">
+  <div class="card stat">
+    <span class="eyebrow">Spend · today</span>
+    <div class="big">{{ spend.today }}</div>
+  </div>
+  <div class="card stat">
+    <span class="eyebrow">Spend · this week</span>
+    <div class="big">{{ spend.week }}</div>
+  </div>
+  <div class="card stat">
+    <span class="eyebrow">Spend · this month</span>
+    <div class="big">{{ spend.month }}</div>
+  </div>
+  <div class="card stat">
+    <span class="eyebrow">Spend · session</span>
+    <div class="big">{{ spend.session }}</div>
+    <span class="muted small">since {{ started_at }}</span>
+  </div>
+</section>
+
+<section class="grid grid-3">
+  <div class="card stat">
+    <span class="eyebrow">Analyses · today</span>
+    <div class="big">{{ volume.today }}</div>
+  </div>
+  <div class="card stat">
+    <span class="eyebrow">Analyses · this week</span>
+    <div class="big">{{ volume.week }}</div>
+  </div>
+  <div class="card stat">
+    <span class="eyebrow">Analyses · session</span>
+    <div class="big">{{ volume.session }}</div>
+  </div>
+</section>
+
+<section class="card">
+  <span class="eyebrow">Latency</span>
+  <table>
+    <thead>
+      <tr><th>Route</th><th>n</th><th>avg</th><th>p95</th></tr>
+    </thead>
+    <tbody>
+      {% for route, l in latency.items() %}
+      <tr>
+        <td><code>{{ route }}</code></td>
+        <td>{{ l.n }}</td>
+        <td>{% if l.avg_ms %}{{ "%.0f"|format(l.avg_ms) }} ms{% else %}—{% endif %}</td>
+        <td>{% if l.p95_ms %}{{ "%.0f"|format(l.p95_ms) }} ms{% else %}—{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <span class="eyebrow">Errors (last 24h)</span>
+  <p class="big" style="margin-bottom:12px">{{ errors.count_24h }}</p>
+  {% if errors.last_5 %}
+  <table>
+    <thead>
+      <tr><th>When</th><th>Route</th><th>Model</th><th>Message</th></tr>
+    </thead>
+    <tbody>
+      {% for e in errors.last_5 %}
+      <tr>
+        <td class="small">{{ format_ts(e.when) }}</td>
+        <td><code>{{ e.route }}</code></td>
+        <td class="small">{{ e.model }}</td>
+        <td class="small">{{ e.error }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted small">No errors recorded.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <span class="eyebrow">Recent activity (last 20)</span>
+  {% if activity %}
+  <table>
+    <thead>
+      <tr><th>When</th><th>Project</th><th>Score</th><th>Model</th></tr>
+    </thead>
+    <tbody>
+      {% for a in activity %}
+      <tr>
+        <td class="small">{{ a.when }}</td>
+        <td>{{ a.project_name }}</td>
+        <td>{% if a.total_score is not none %}{{ a.total_score }}/50{% else %}—{% endif %}</td>
+        <td class="small">{{ a.model }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted small">No completed analyses yet.</p>
+  {% endif %}
+</section>
+
+</main>
+</body>
+</html>

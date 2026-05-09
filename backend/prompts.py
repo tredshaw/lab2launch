@@ -5,16 +5,21 @@ final pass produces the full gap analysis report.
 """
 import json
 import os
+import time
 import anthropic
 from dotenv import load_dotenv
+
+from metrics import metrics
 
 load_dotenv()
 
 _client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-# dev/first-pass: claude-haiku-4-5-20251001  |  demo submission: claude-sonnet-4-6
-_MODEL_FIRST_PASS = "claude-haiku-4-5-20251001"
-_MODEL_FINAL = "claude-haiku-4-5-20251001"
+# Models are env-driven so they can be tweaked in deployment without redeploying.
+# First pass: fast/cheap (haiku) for follow-up question generation.
+# Final pass: quality (sonnet) for the scored gap analysis.
+_MODEL_FIRST_PASS = os.getenv("MODEL_FIRST_PASS", "claude-haiku-4-5-20251001")
+_MODEL_FINAL      = os.getenv("MODEL_FINAL",      "claude-sonnet-4-6")
 
 
 # =============================================================================
@@ -395,14 +400,38 @@ def _parse_json(raw: str) -> dict:
     return obj
 
 
+def _call_claude(route: str, model: str, max_tokens: int, prompt: str) -> str:
+    """Wrap the Anthropic call with metrics capture (tokens, latency, errors)."""
+    started = time.time()
+    try:
+        message = _client.messages.create(
+            model=model,
+            max_tokens=max_tokens,
+            messages=[{"role": "user", "content": prompt}],
+        )
+    except Exception as e:
+        metrics.record_call(
+            route=route, model=model,
+            input_tokens=0, output_tokens=0,
+            latency_ms=(time.time() - started) * 1000,
+            error=str(e),
+        )
+        raise
+
+    usage = getattr(message, "usage", None)
+    metrics.record_call(
+        route=route, model=model,
+        input_tokens=getattr(usage, "input_tokens", 0) or 0,
+        output_tokens=getattr(usage, "output_tokens", 0) or 0,
+        latency_ms=(time.time() - started) * 1000,
+    )
+    return message.content[0].text
+
+
 def run_first_pass(user_inputs_block: str) -> dict:
     prompt = FIRST_PASS_PROMPT.format(user_inputs_block=user_inputs_block)
-    message = _client.messages.create(
-        model=_MODEL_FIRST_PASS,
-        max_tokens=1500,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return _parse_json(message.content[0].text)
+    text = _call_claude("/first-pass", _MODEL_FIRST_PASS, 1500, prompt)
+    return _parse_json(text)
 
 
 def run_final_analysis(
@@ -416,9 +445,10 @@ def run_final_analysis(
         follow_up_block=follow_up_block,
         preliminary_assessment=preliminary_assessment,
     )
-    message = _client.messages.create(
-        model=_MODEL_FINAL,
-        max_tokens=4000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return _parse_json(message.content[0].text)
+    text = _call_claude("/final-analysis", _MODEL_FINAL, 4000, prompt)
+    return _parse_json(text)
+
+
+def model_for(route: str) -> str:
+    """Helper for callers (admin metrics) to know which model handled a route."""
+    return _MODEL_FIRST_PASS if route == "/first-pass" else _MODEL_FINAL

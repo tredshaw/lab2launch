@@ -40,7 +40,7 @@ interface AnalysisResult {
 }
 
 interface Analysis {
-  id: number
+  id: number | string
   project_name: string
   created_at: string
   result: AnalysisResult
@@ -110,6 +110,7 @@ export default function Results() {
   const { id } = useParams<{ id: string }>()
   const [analysis, setAnalysis] = useState<Analysis | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(`/analyses/${id}`)
@@ -117,6 +118,34 @@ export default function Results() {
       .then(setAnalysis)
       .catch(e => setError(e.message))
   }, [id])
+
+  useEffect(() => {
+    if (!toast) return
+    const t = setTimeout(() => setToast(null), 3000)
+    return () => clearTimeout(t)
+  }, [toast])
+
+  async function downloadPdf() {
+    if (!analysis) return
+    try {
+      const res = await fetch('/download-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ analysis: analysis.result, project_name: analysis.project_name || 'report' }),
+      })
+      if (!res.ok) throw new Error(`${res.status}`)
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const el = document.createElement('a')
+      el.href = url
+      el.download = `${analysis.project_name || 'report'}.pdf`
+      el.click()
+      URL.revokeObjectURL(url)
+      setToast('PDF downloaded')
+    } catch {
+      setToast('Download failed — please try again')
+    }
+  }
 
   if (error) return (
     <>
@@ -163,6 +192,32 @@ export default function Results() {
             </div>
             <Tag variant="teal">{r.stage_label}</Tag>
           </div>
+        </div>
+
+        {/* PDF download — primary call-to-action immediately under the header.
+            The analysis is not persisted server-side; the PDF is the user's only artefact. */}
+        <div style={{
+          marginBottom: 48,
+          padding: '20px 24px',
+          background: 'var(--surface)',
+          border: '1px solid var(--hairline)',
+          borderRadius: 'var(--r-3)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 24,
+          flexWrap: 'wrap',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+        }}>
+          <div style={{ flex: '1 1 320px' }}>
+            <span className="t-mono" style={{ display: 'block', marginBottom: 4 }}>Save your report</span>
+            <p style={{ fontSize: 14, color: 'var(--ink)', lineHeight: 1.5 }}>
+              Download a copy — your analysis isn't saved.
+            </p>
+          </div>
+          <button type="button" className="btn btn-primary" onClick={downloadPdf}>
+            Download PDF <span className="arr">→</span>
+          </button>
         </div>
 
         {/* Radar — centred, large */}
@@ -242,31 +297,42 @@ export default function Results() {
         )}
 
         {/* Footer */}
-        <div style={{ display: 'flex', gap: 12, paddingTop: 32, borderTop: '1px solid var(--hairline)' }}>
-          <a
-            href="#download"
-            className="btn btn-primary"
-            onClick={async e => {
-              e.preventDefault()
-              const res = await fetch('/download-pdf', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ analysis: r, project_name: analysis.project_name || 'report' }),
-              })
-              const blob = await res.blob()
-              const url = URL.createObjectURL(blob)
-              const el = document.createElement('a')
-              el.href = url; el.download = `${analysis.project_name || 'report'}.pdf`; el.click()
-              URL.revokeObjectURL(url)
-            }}
-          >
-            Download PDF →
-          </a>
+        <div style={{ display: 'flex', gap: 12, paddingTop: 32, borderTop: '1px solid var(--hairline)', flexWrap: 'wrap' }}>
+          <button type="button" className="btn btn-ghost" onClick={downloadPdf}>
+            Download PDF <span className="arr">→</span>
+          </button>
           <Link to="/analyse" className="btn btn-ghost">Run another analysis</Link>
           <Link to="/" className="btn btn-ghost">Home</Link>
         </div>
 
       </div>
+
+      {/* Toast — non-blocking confirmation */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          style={{
+            position: 'fixed',
+            bottom: 32,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'var(--ink)',
+            color: 'var(--bg)',
+            padding: '12px 20px',
+            borderRadius: 'var(--r-pill)',
+            fontFamily: 'var(--sans)',
+            fontSize: 14,
+            fontWeight: 500,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+            zIndex: 100,
+            animation: 'fadein 0.2s ease-out both',
+          }}
+        >
+          {toast}
+        </div>
+      )}
+
       <style>{`
         .actions-grid {
           display: grid;

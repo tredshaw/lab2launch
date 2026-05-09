@@ -1,0 +1,43 @@
+# Render deployment manifest for Lab2Launch.
+# Single web service: builds the React frontend, installs Python deps with
+# system packages for WeasyPrint, serves the API + SPA from one uvicorn.
+#
+# Required env vars (set in the Render dashboard, not committed here):
+#   ANTHROPIC_API_KEY  — Anthropic API key
+#   SESSION_SECRET     — secret for /admin signed cookie (Ticket 5)
+#   RESEND_API_KEY     — Resend API key for /admin magic-link email (Ticket 5)
+#
+# Optional overrides (defaults are sensible):
+#   MODEL_FIRST_PASS   — default claude-haiku-4-5-20251001
+#   MODEL_FINAL        — default claude-sonnet-4-6
+
+services:
+  - type: web
+    name: lab2launch
+    runtime: python
+    plan: free
+    region: frankfurt
+    rootDir: .
+    buildCommand: |
+      apt-get update && apt-get install -y --no-install-recommends \
+        libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libfontconfig1 libcairo2 && \
+      cd frontend && npm ci && npm run build && cd .. && \
+      pip install --upgrade pip && \
+      pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PYTHON_VERSION
+        value: "3.11"
+      - key: MODEL_FIRST_PASS
+        value: claude-haiku-4-5-20251001
+      - key: MODEL_FINAL
+        value: claude-sonnet-4-6
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false

@@ -1,28 +1,26 @@
+import os
 import time
 import uuid
 from datetime import datetime
 from pathlib import Path
 from typing import List
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
+from starlette.requests import Request
 
-import database
-import models
+import admin
 import pdf_generator
 import prompts
-
-# Create tables on startup (idempotent; safe to call every run)
-models  # ensure Analysis is registered with Base.metadata
-database.Base.metadata.create_all(bind=database.engine)
+from metrics import metrics
 
 _VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
+_ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI(title="Lab2Launch", version=_VERSION)
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.include_router(admin.router)
 
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
@@ -34,7 +32,8 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# In-memory session store — keyed by UUID, expires after 30 minutes
+# In-memory wizard session store — holds first-pass state between
+# /first-pass and /final-analysis. Keyed by session UUID, 30-min TTL.
 # ---------------------------------------------------------------------------
 _sessions: dict = {}
 _SESSION_TTL = 30 * 60
@@ -45,6 +44,22 @@ def _cleanup_sessions() -> None:
     expired = [k for k, v in _sessions.items() if now - v["created_at"] > _SESSION_TTL]
     for k in expired:
         del _sessions[k]
+
+
+# ---------------------------------------------------------------------------
+# In-memory completed-analysis cache — holds finished analyses so the
+# Results page can fetch them via GET /analyses/{id}. Keyed by analysis UUID,
+# 30-min TTL. Process-local: assumes single-worker uvicorn.
+# ---------------------------------------------------------------------------
+_completed: dict = {}
+_COMPLETED_TTL = 30 * 60
+
+
+def _cleanup_completed() -> None:
+    now = time.time()
+    expired = [k for k, v in _completed.items() if now - v["created_at"] > _COMPLETED_TTL]
+    for k in expired:
+        del _completed[k]
 
 
 # ---------------------------------------------------------------------------
@@ -82,21 +97,12 @@ class PdfRequest(BaseModel):
     project_name: str = "Research Project"
 
 
-class RenameRequest(BaseModel):
-    name: str = Field(..., min_length=1, max_length=256)
-
-
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
 
-@app.get("/")
-def index():
-    return FileResponse("static/index.html")
-
-
 @app.post("/first-pass")
-def first_pass(req: FirstPassRequest, db: Session = Depends(database.get_db)):
+def first_pass(req: FirstPassRequest):
     _cleanup_sessions()
     user_inputs_block = prompts._build_user_inputs_block(
         research_area=req.research_area,
@@ -117,45 +123,44 @@ def first_pass(req: FirstPassRequest, db: Session = Depends(database.get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    row = models.Analysis(
-        project_name=req.project_name or "Untitled",
-        status="pending",
-        research_area=req.research_area,
-        stage_value=req.stage_value,
-        stage_label=req.stage_label,
-        goal_type=req.goal_type,
-        goal_quantification=req.goal_quantification,
-        goal_rationale=req.goal_rationale,
-        team_size=req.team_size,
-        q1_answer=req.q1_answer,
-        q2_answer=req.q2_answer,
-        q3_answer=req.q3_answer,
-        q4_answer=req.q4_answer,
-        q5_answer=req.q5_answer,
-        follow_up_questions=result.get("follow_up_questions", []),
-        preliminary_assessment=result.get("preliminary_assessment", ""),
-    )
-    db.add(row)
-    db.commit()
-    db.refresh(row)
+    analysis_id = str(uuid.uuid4())
+    follow_up_questions = result.get("follow_up_questions", [])
 
     session_id = str(uuid.uuid4())
     _sessions[session_id] = {
-        "analysis_id": row.id,
+        "analysis_id": analysis_id,
+        "project_name": req.project_name or "Untitled",
         "user_inputs_block": user_inputs_block,
         "preliminary_assessment": result.get("preliminary_assessment", ""),
+        "inputs": {
+            "project_name":         req.project_name or "Untitled",
+            "research_area":        req.research_area,
+            "stage_value":          req.stage_value,
+            "stage_label":          req.stage_label,
+            "goal_type":            req.goal_type,
+            "goal_quantification":  req.goal_quantification,
+            "goal_rationale":       req.goal_rationale,
+            "team_size":            req.team_size,
+            "q1_answer":            req.q1_answer,
+            "q2_answer":            req.q2_answer,
+            "q3_answer":            req.q3_answer,
+            "q4_answer":            req.q4_answer,
+            "q5_answer":            req.q5_answer,
+        },
+        "follow_up_questions": follow_up_questions,
         "created_at": time.time(),
     }
     return {
         "session_id": session_id,
-        "analysis_id": row.id,
-        "follow_up_questions": result.get("follow_up_questions", []),
+        "analysis_id": analysis_id,
+        "follow_up_questions": follow_up_questions,
     }
 
 
 @app.post("/final-analysis")
-def final_analysis(req: FinalAnalysisRequest, db: Session = Depends(database.get_db)):
+def final_analysis(req: FinalAnalysisRequest):
     _cleanup_sessions()
+    _cleanup_completed()
     session = _sessions.get(req.session_id)
     if not session:
         raise HTTPException(
@@ -176,15 +181,22 @@ def final_analysis(req: FinalAnalysisRequest, db: Session = Depends(database.get
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    analysis_id = session.get("analysis_id")
-    if analysis_id:
-        row = db.query(models.Analysis).filter(models.Analysis.id == analysis_id).first()
-        if row:
-            row.follow_up_answers = [a.model_dump() for a in req.follow_up_answers]
-            row.analysis_result = result
-            row.status = "complete"
-            row.completed_at = datetime.utcnow()
-            db.commit()
+    analysis_id = session["analysis_id"]
+    _completed[analysis_id] = {
+        "created_at": time.time(),
+        "id": analysis_id,
+        "project_name": session["project_name"],
+        "created_at_iso": datetime.utcnow().isoformat(),
+        "inputs": session["inputs"],
+        "follow_up_questions": session["follow_up_questions"],
+        "follow_up_answers": [a.model_dump() for a in req.follow_up_answers],
+        "result": result,
+    }
+    metrics.record_analysis(
+        project_name=session["project_name"],
+        total_score=result.get("total_score"),
+        model=prompts.model_for("/final-analysis"),
+    )
 
     del _sessions[req.session_id]
     return {**result, "analysis_id": analysis_id}
@@ -204,81 +216,54 @@ def download_pdf(req: PdfRequest):
     )
 
 
-# ---------------------------------------------------------------------------
-# Analysis history endpoints
-# ---------------------------------------------------------------------------
-
-@app.get("/analyses")
-def list_analyses(db: Session = Depends(database.get_db)):
-    rows = (
-        db.query(models.Analysis)
-        .filter(models.Analysis.status == "complete")
-        .order_by(models.Analysis.created_at.desc())
-        .all()
-    )
-    return [
-        {
-            "id": r.id,
-            "project_name": r.project_name,
-            "created_at": r.created_at.isoformat(),
-            "stage_label": (r.analysis_result or {}).get("stage_label", ""),
-            "total_score": (r.analysis_result or {}).get("total_score"),
-        }
-        for r in rows
-    ]
-
-
 @app.get("/analyses/{analysis_id}")
-def get_analysis(analysis_id: int, db: Session = Depends(database.get_db)):
-    row = db.query(models.Analysis).filter(models.Analysis.id == analysis_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    inputs = {
-        "project_name":         row.project_name,
-        "research_area":        row.research_area,
-        "stage_value":          row.stage_value,
-        "stage_label":          row.stage_label,
-        "goal_type":            row.goal_type,
-        "goal_quantification":  row.goal_quantification,
-        "goal_rationale":       row.goal_rationale,
-        "team_size":            row.team_size,
-        "q1_answer":            row.q1_answer,
-        "q2_answer":            row.q2_answer,
-        "q3_answer":            row.q3_answer,
-        "q4_answer":            row.q4_answer,
-        "q5_answer":            row.q5_answer,
-    }
+def get_analysis(analysis_id: str):
+    _cleanup_completed()
+    entry = _completed.get(analysis_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Analysis not found or expired")
     return {
-        "id":                  row.id,
-        "project_name":        row.project_name,
-        "created_at":          row.created_at.isoformat(),
-        "inputs":              inputs,
-        "follow_up_questions": row.follow_up_questions,
-        "follow_up_answers":   row.follow_up_answers,
-        "result":              row.analysis_result,
+        "id":                  entry["id"],
+        "project_name":        entry["project_name"],
+        "created_at":          entry["created_at_iso"],
+        "inputs":              entry["inputs"],
+        "follow_up_questions": entry["follow_up_questions"],
+        "follow_up_answers":   entry["follow_up_answers"],
+        "result":              entry["result"],
     }
 
 
-@app.patch("/analyses/{analysis_id}/name")
-def rename_analysis(analysis_id: int, req: RenameRequest, db: Session = Depends(database.get_db)):
-    row = db.query(models.Analysis).filter(models.Analysis.id == analysis_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    row.project_name = req.name
-    db.commit()
-    return {"ok": True}
-
-
-@app.delete("/analyses/{analysis_id}")
-def delete_analysis(analysis_id: int, db: Session = Depends(database.get_db)):
-    row = db.query(models.Analysis).filter(models.Analysis.id == analysis_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Analysis not found")
-    db.delete(row)
-    db.commit()
-    return {"ok": True}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 @app.get("/version")
 def get_version():
     return {"version": _VERSION}
+
+
+# ---------------------------------------------------------------------------
+# SPA serving — in production, FastAPI serves the built React app from
+# frontend/dist. In dev, Vite serves the frontend on :5173 and proxies API
+# calls to this backend, so this mount is skipped.
+# ---------------------------------------------------------------------------
+
+_FRONTEND_DIST = Path(__file__).parent.parent / "frontend" / "dist"
+
+if _ENVIRONMENT == "production" and _FRONTEND_DIST.is_dir():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=str(_FRONTEND_DIST / "assets")),
+        name="assets",
+    )
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str, request: Request):
+        # Any non-API path falls through here. If the dist contains the
+        # exact file (favicon, etc.), serve it; otherwise serve index.html
+        # so React Router can take over.
+        candidate = _FRONTEND_DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIST / "index.html")
