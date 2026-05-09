@@ -12,9 +12,11 @@ load_dotenv()
 
 _client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-# dev/first-pass: claude-haiku-4-5-20251001  |  demo submission: claude-sonnet-4-6
-_MODEL_FIRST_PASS = "claude-haiku-4-5-20251001"
-_MODEL_FINAL = "claude-haiku-4-5-20251001"
+# Models are env-driven so they can be tweaked in deployment without redeploying.
+# First pass: fast/cheap (haiku) for follow-up question generation.
+# Final pass: quality (sonnet) for the scored gap analysis.
+_MODEL_FIRST_PASS = os.getenv("MODEL_FIRST_PASS", "claude-haiku-4-5-20251001")
+_MODEL_FINAL      = os.getenv("MODEL_FINAL",      "claude-sonnet-4-6")
 
 
 # =============================================================================

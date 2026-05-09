@@ -1,3 +1,4 @@
+import os
 import time
 import uuid
 from datetime import datetime
@@ -5,13 +6,16 @@ from pathlib import Path
 from typing import List
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import Response
+from fastapi.responses import FileResponse, Response
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
+from starlette.requests import Request
 
 import pdf_generator
 import prompts
 
 _VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
+_ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI(title="Lab2Launch", version=_VERSION)
 
@@ -221,6 +225,37 @@ def get_analysis(analysis_id: str):
     }
 
 
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
 @app.get("/version")
 def get_version():
     return {"version": _VERSION}
+
+
+# ---------------------------------------------------------------------------
+# SPA serving — in production, FastAPI serves the built React app from
+# frontend/dist. In dev, Vite serves the frontend on :5173 and proxies API
+# calls to this backend, so this mount is skipped.
+# ---------------------------------------------------------------------------
+
+_FRONTEND_DIST = Path(__file__).parent.parent / "frontend" / "dist"
+
+if _ENVIRONMENT == "production" and _FRONTEND_DIST.is_dir():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=str(_FRONTEND_DIST / "assets")),
+        name="assets",
+    )
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str, request: Request):
+        # Any non-API path falls through here. If the dist contains the
+        # exact file (favicon, etc.), serve it; otherwise serve index.html
+        # so React Router can take over.
+        candidate = _FRONTEND_DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIST / "index.html")
