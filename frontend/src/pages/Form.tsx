@@ -123,26 +123,6 @@ export default function Form() {
     )
   }
 
-  if (phase === 'done') {
-    return (
-      <>
-        <TopNav />
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: 24, padding: 32, textAlign: 'center' }}>
-          <span style={{ fontSize: 48 }}>Σ</span>
-          <h1 className="t-h2">Analysis complete</h1>
-          <p className="t-body" style={{ maxWidth: 420 }}>
-            Your gap analysis is ready. Results display is coming in the next version.
-            For now, view your analysis in the legacy dashboard.
-          </p>
-          <Button variant="primary" size="lg" href="/static/index.html" arrow>
-            View analysis dashboard
-          </Button>
-          <Button variant="ghost" href="/">Back to home</Button>
-        </div>
-      </>
-    )
-  }
-
   if (phase === 'followup') {
     return (
       <>

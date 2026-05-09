@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { INITIAL_FORM_DATA, type FormData } from '../content/form'
 
-export type WizardPhase = 'setup' | 'questions' | 'goal' | 'review' | 'running' | 'followup' | 'done'
+export type WizardPhase = 'setup' | 'questions' | 'goal' | 'review' | 'running' | 'followup'
 
 export interface FollowUpQuestion {
   question: string
