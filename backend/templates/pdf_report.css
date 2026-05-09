@@ -150,9 +150,11 @@ html, body {
   font-weight: 500;
   margin-bottom: 12pt;
   display: block;
+  page-break-after: avoid;
+  break-after: avoid;
 }
 
-.section { margin-bottom: 28pt; }
+.section { margin-bottom: 24pt; }
 
 /* ==================== ACTIONS ==================== */
 
@@ -236,6 +238,8 @@ html, body {
   background: #FFFFFF;
   border: 1px solid #DBD4C4;
   border-radius: 6pt;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .dim-head {
