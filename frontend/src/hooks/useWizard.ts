@@ -15,7 +15,7 @@ interface WizardState {
   sessionId: string | null
   followUpQuestions: FollowUpQuestion[]
   followUpAnswers: string[]
-  analysisId: number | null
+  analysisId: string | null
   error: string | null
 }
 

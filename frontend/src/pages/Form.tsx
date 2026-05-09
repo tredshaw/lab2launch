@@ -191,7 +191,6 @@ export default function Form() {
                 size="lg"
                 arrow
                 onClick={submitFinalAnalysis}
-                disabled={wizard.followUpAnswers.some(a => !a || a.trim().length < 3)}
               >
                 Run final analysis
               </Button>
