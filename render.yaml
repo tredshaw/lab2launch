@@ -1,6 +1,8 @@
 # Render deployment manifest for Lab2Launch.
-# Single web service: builds the React frontend, installs Python deps with
-# system packages for WeasyPrint, serves the API + SPA from one uvicorn.
+# Single web service: builds the React frontend, installs Python deps,
+# serves the API + SPA from one uvicorn. System packages for WeasyPrint
+# (Pango/Cairo/HarfBuzz/Fontconfig) are listed in apt.txt at the repo
+# root — Render installs them as root before running buildCommand.
 #
 # Required env vars (set in the Render dashboard, not committed here):
 #   ANTHROPIC_API_KEY  — Anthropic API key
@@ -19,8 +21,6 @@ services:
     region: frankfurt
     rootDir: .
     buildCommand: |
-      apt-get update && apt-get install -y --no-install-recommends \
-        libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libfontconfig1 libcairo2 && \
       cd frontend && npm ci && npm run build && cd .. && \
       pip install --upgrade pip && \
       pip install -r backend/requirements.txt
