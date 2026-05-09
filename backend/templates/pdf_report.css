@@ -157,16 +157,21 @@ html, body {
 /* ==================== ACTIONS ==================== */
 
 .actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10pt;
+  display: table;
+  width: 100%;
+  border-spacing: 8pt 0;
+  table-layout: fixed;
+  margin-left: -8pt;
+  margin-right: -8pt;
 }
 
 .action-card {
+  display: table-cell;
+  width: 33.33%;
+  vertical-align: top;
   background: #FFFFFF;
   border: 1px solid #DBD4C4;
   border-radius: 6pt;
-  overflow: hidden;
   page-break-inside: avoid;
   break-inside: avoid;
 }
@@ -231,9 +236,6 @@ html, body {
   background: #FFFFFF;
   border: 1px solid #DBD4C4;
   border-radius: 6pt;
-  overflow: hidden;
-  page-break-inside: avoid;
-  break-inside: avoid;
 }
 
 .dim-head {
@@ -298,12 +300,16 @@ html, body {
 .dim-seg-fill-low    { background: #1E7A8C; }
 
 .dim-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: table;
+  width: 100%;
+  table-layout: fixed;
   border-bottom: 1px solid #DBD4C4;
 }
 
 .dim-col {
+  display: table-cell;
+  width: 33.33%;
+  vertical-align: top;
   padding: 10pt 14pt;
   border-left: 1px solid #DBD4C4;
 }
@@ -369,12 +375,20 @@ html, body {
 /* ==================== ASSETS ==================== */
 
 .assets-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10pt;
+  display: table;
+  width: 100%;
+  border-spacing: 8pt 8pt;
+  table-layout: fixed;
+  margin-left: -8pt;
+  margin-right: -8pt;
 }
 
+.assets-row { display: table-row; }
+
 .asset-card {
+  display: table-cell;
+  width: 50%;
+  vertical-align: top;
   background: #FFFFFF;
   border: 1px solid #DBD4C4;
   border-radius: 5pt;

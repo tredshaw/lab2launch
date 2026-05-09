@@ -102,11 +102,16 @@
 <section class="section">
   <span class="section-label">Your assets</span>
   <div class="assets-grid">
-    {% for a in result.assets %}
-    <div class="asset-card">
-      <span class="tag tag-signal">Asset {{ loop.index }}</span>
-      <strong class="asset-name">{{ a.asset }}</strong>
-      <p class="asset-why">{{ a.why_it_matters }}</p>
+    {% for pair in result.assets|batch(2) %}
+    {% set row_idx = loop.index0 %}
+    <div class="assets-row">
+      {% for a in pair %}
+      <div class="asset-card">
+        <span class="tag tag-signal">Asset {{ row_idx * 2 + loop.index }}</span>
+        <strong class="asset-name">{{ a.asset }}</strong>
+        <p class="asset-why">{{ a.why_it_matters }}</p>
+      </div>
+      {% endfor %}
     </div>
     {% endfor %}
   </div>
