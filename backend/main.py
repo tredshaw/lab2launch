@@ -5,8 +5,7 @@ from pathlib import Path
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -22,7 +21,6 @@ database.Base.metadata.create_all(bind=database.engine)
 _VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
 
 app = FastAPI(title="Lab2Launch", version=_VERSION)
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
@@ -89,11 +87,6 @@ class RenameRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
-
-@app.get("/")
-def index():
-    return FileResponse("static/index.html")
-
 
 @app.post("/first-pass")
 def first_pass(req: FirstPassRequest, db: Session = Depends(database.get_db)):
