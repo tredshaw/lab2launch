@@ -232,12 +232,13 @@ html, body {
 
 /* ==================== DIMENSION CARDS ==================== */
 
-.dimensions { display: flex; flex-direction: column; gap: 12pt; }
+.dimensions { display: block; }
 
 .dim-card {
   background: #FFFFFF;
   border: 1px solid #DBD4C4;
   border-radius: 6pt;
+  margin-bottom: 12pt;
   page-break-inside: avoid;
   break-inside: avoid;
 }
@@ -245,14 +246,14 @@ html, body {
 .dim-head {
   padding: 12pt 16pt;
   border-bottom: 1px solid #DBD4C4;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16pt;
 }
 
-.dim-head-left { flex: 1; }
-.dim-head-right { text-align: right; flex-shrink: 0; }
+/* Use a real <table> for the head's two-column score-on-the-right layout —
+ * WeasyPrint's flex/grid is unreliable but tables are bulletproof. */
+.dim-head-table { width: 100%; border-collapse: collapse; }
+.dim-head-table td { vertical-align: top; padding: 0; border: none; }
+.dim-head-left { width: 70%; padding-right: 16pt !important; }
+.dim-head-right { width: 30%; text-align: right; }
 
 .dim-name {
   font-weight: 700;
@@ -286,43 +287,34 @@ html, body {
 }
 
 .dim-bar {
-  display: flex;
-  gap: 2pt;
   margin: 6pt 0 6pt;
-  justify-content: flex-end;
+  text-align: right;
+  font-size: 0;
 }
 
 .dim-seg {
+  display: inline-block;
   width: 7pt;
   height: 4pt;
   border-radius: 1pt;
   background: #DBD4C4;
+  margin-left: 2pt;
 }
 
 .dim-seg-fill-high   { background: #F26B5E; }
 .dim-seg-fill-medium { background: #FBB829; }
 .dim-seg-fill-low    { background: #1E7A8C; }
 
-.dim-grid {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+/* Stacked rows replace the old 3-col grid — far more reliable in
+ * WeasyPrint and easier to read at A4 width. */
+.dim-row {
+  padding: 12pt 16pt;
   border-bottom: 1px solid #DBD4C4;
 }
 
-.dim-col {
-  display: table-cell;
-  width: 33.33%;
-  vertical-align: top;
-  padding: 10pt 14pt;
-  border-left: 1px solid #DBD4C4;
-}
-
-.dim-col:first-child { border-left: none; }
-
 .dim-col-label {
   font-family: 'Courier', monospace;
-  font-size: 7pt;
+  font-size: 8pt;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #6B6356;
@@ -331,16 +323,16 @@ html, body {
   display: block;
 }
 
-.dim-col ul { list-style: none; }
-.dim-col li {
-  font-size: 8.5pt;
-  line-height: 1.5;
+.dim-row ul { list-style: none; padding: 0; margin: 0; }
+.dim-row li {
+  font-size: 9pt;
+  line-height: 1.55;
   color: #2A3548;
   margin-bottom: 5pt;
-  padding-left: 8pt;
+  padding-left: 10pt;
   position: relative;
 }
-.dim-col li::before {
+.dim-row li::before {
   content: "·";
   color: #6B6356;
   position: absolute;
@@ -348,32 +340,29 @@ html, body {
 }
 
 .dim-action {
-  padding: 10pt 16pt;
+  padding: 12pt 16pt;
   background: #ECE7DC;
-  display: flex;
-  gap: 8pt;
+  border-bottom: 1px solid #DBD4C4;
 }
 
 .dim-action-label {
   font-family: 'Courier', monospace;
-  font-size: 7pt;
+  font-size: 8pt;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #6B6356;
   font-weight: 500;
-  flex-shrink: 0;
-  padding-top: 1pt;
+  margin-right: 8pt;
 }
 
 .dim-action-text {
-  font-size: 9pt;
+  font-size: 9.5pt;
   color: #0A1320;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .dim-frames {
-  padding: 8pt 16pt;
-  border-top: 1px solid #DBD4C4;
+  padding: 10pt 16pt;
 }
 
 /* ==================== ASSETS ==================== */

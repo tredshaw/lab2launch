@@ -54,34 +54,36 @@
       {% if dim %}
       <div class="dim-card">
         <div class="dim-head">
-          <div class="dim-head-left">
-            <span class="dim-name">{{ label }}</span>
-            <p class="dim-justification">{{ dim.justification }}</p>
-          </div>
-          <div class="dim-head-right">
-            <span class="dim-score">{{ dim.score }}</span><span class="dim-score-of">/10</span>
-            <div class="dim-bar">
-              {% for i in range(10) %}
-                <div class="dim-seg{% if i < dim.score %} dim-seg-fill-{{ dim.priority|lower }}{% endif %}"></div>
-              {% endfor %}
-            </div>
-            <div class="tag tag-{{ dim.priority|lower }}">{{ dim.priority }} priority</div>
-          </div>
+          <table class="dim-head-table"><tr>
+            <td class="dim-head-left">
+              <span class="dim-name">{{ label }}</span>
+              <p class="dim-justification">{{ dim.justification }}</p>
+            </td>
+            <td class="dim-head-right">
+              <span class="dim-score">{{ dim.score }}</span><span class="dim-score-of">/10</span>
+              <div class="dim-bar">
+                {% for i in range(10) %}
+                  <div class="dim-seg{% if i < dim.score %} dim-seg-fill-{{ dim.priority|lower }}{% endif %}"></div>
+                {% endfor %}
+              </div>
+              <div class="tag tag-{{ dim.priority|lower }}">{{ dim.priority }} priority</div>
+            </td>
+          </tr></table>
         </div>
-        <div class="dim-grid">
-          <div class="dim-col">
-            <span class="dim-col-label">Current state</span>
-            <ul>{% for b in dim.now %}<li>{{ b }}</li>{% endfor %}</ul>
-          </div>
-          <div class="dim-col">
-            <span class="dim-col-label">Target state</span>
-            <ul>{% for b in dim.target %}<li>{{ b }}</li>{% endfor %}</ul>
-          </div>
-          <div class="dim-col">
-            <span class="dim-col-label">The gap</span>
-            <ul>{% for b in dim.gap %}<li>{{ b }}</li>{% endfor %}</ul>
-          </div>
+
+        <div class="dim-row">
+          <span class="dim-col-label">Current state</span>
+          <ul>{% for b in dim.now %}<li>{{ b }}</li>{% endfor %}</ul>
         </div>
+        <div class="dim-row">
+          <span class="dim-col-label">Target state</span>
+          <ul>{% for b in dim.target %}<li>{{ b }}</li>{% endfor %}</ul>
+        </div>
+        <div class="dim-row">
+          <span class="dim-col-label">The gap</span>
+          <ul>{% for b in dim.gap %}<li>{{ b }}</li>{% endfor %}</ul>
+        </div>
+
         <div class="dim-action">
           <span class="dim-action-label">Action</span>
           <span class="dim-action-text">{{ dim.action }}</span>
