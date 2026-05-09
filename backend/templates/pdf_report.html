@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ project_name }} — Gap Analysis</title>
+<link rel="stylesheet" href="{{ css_path }}">
+</head>
+<body>
+
+<span class="report-date">{{ generated_date }}</span>
+
+<header class="header">
+  <div class="header-left">
+    <span class="eyebrow">Gap analysis report</span>
+    <h1 class="project-title">{{ project_name|default('Untitled project') }}</h1>
+    <p class="summary">{{ result.plain_english_summary }}</p>
+  </div>
+  <div class="header-right">
+    <span class="eyebrow">Readiness score</span>
+    <div class="score-block">
+      <span class="score-number">{{ result.total_score }}</span><span class="score-of">/50</span>
+    </div>
+    <div class="tag tag-low">{{ result.stage_label }}</div>
+  </div>
+</header>
+
+{# ===== Top 3 actions ===== #}
+{% if result.top_3_actions %}
+<section class="section">
+  <span class="section-label">Top 3 actions</span>
+  <div class="actions">
+    {% for a in result.top_3_actions %}
+    <div class="action-card">
+      <div class="action-head">
+        <span class="action-rank">{{ a.rank }}</span><strong class="action-headline">{{ a.headline }}</strong>
+        <p class="action-deliverable">{{ a.deliverable }}</p>
+      </div>
+      <div class="action-week">
+        <span class="action-week-label">This week</span>
+        <p class="action-week-text">{{ a.first_step }}</p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ===== Five dimensions ===== #}
+<section class="section">
+  <span class="section-label">Five dimensions</span>
+  <div class="dimensions">
+    {% for key, label in dim_labels %}
+      {% set dim = result.dimensions[key] %}
+      {% if dim %}
+      <div class="dim-card">
+        <div class="dim-head">
+          <div class="dim-head-left">
+            <span class="dim-name">{{ label }}</span>
+            <p class="dim-justification">{{ dim.justification }}</p>
+          </div>
+          <div class="dim-head-right">
+            <span class="dim-score">{{ dim.score }}</span><span class="dim-score-of">/10</span>
+            <div class="dim-bar">
+              {% for i in range(10) %}
+                <div class="dim-seg{% if i < dim.score %} dim-seg-fill-{{ dim.priority|lower }}{% endif %}"></div>
+              {% endfor %}
+            </div>
+            <div class="tag tag-{{ dim.priority|lower }}">{{ dim.priority }} priority</div>
+          </div>
+        </div>
+        <div class="dim-grid">
+          <div class="dim-col">
+            <span class="dim-col-label">Current state</span>
+            <ul>{% for b in dim.now %}<li>{{ b }}</li>{% endfor %}</ul>
+          </div>
+          <div class="dim-col">
+            <span class="dim-col-label">Target state</span>
+            <ul>{% for b in dim.target %}<li>{{ b }}</li>{% endfor %}</ul>
+          </div>
+          <div class="dim-col">
+            <span class="dim-col-label">The gap</span>
+            <ul>{% for b in dim.gap %}<li>{{ b }}</li>{% endfor %}</ul>
+          </div>
+        </div>
+        <div class="dim-action">
+          <span class="dim-action-label">Action</span>
+          <span class="dim-action-text">{{ dim.action }}</span>
+        </div>
+        {% if dim.framework_tags %}
+        <div class="dim-frames">
+          {% for f in dim.framework_tags %}<span class="tag-frame">{{ f }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{# ===== Assets ===== #}
+{% if result.assets %}
+<section class="section">
+  <span class="section-label">Your assets</span>
+  <div class="assets-grid">
+    {% for a in result.assets %}
+    <div class="asset-card">
+      <span class="tag tag-signal">Asset {{ loop.index }}</span>
+      <strong class="asset-name">{{ a.asset }}</strong>
+      <p class="asset-why">{{ a.why_it_matters }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{# ===== Methodology ===== #}
+<section class="methodology">
+  <h3>Methodology</h3>
+  <p>This analysis applies POPIT (People, Organisation, Processes, Information, Technology), SWOT, and Stakeholder Analysis frameworks via prompted reasoning. Scores are calibrated against patterns in pre-seed deep-tech investor diligence, not industry-wide benchmarks. Treat the output as a structured second opinion, not a verdict.</p>
+</section>
+
+</body>
+</html>

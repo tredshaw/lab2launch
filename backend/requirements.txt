@@ -2,5 +2,5 @@ fastapi
 uvicorn[standard]
 python-dotenv
 anthropic
-fpdf2
 weasyprint
+jinja2
