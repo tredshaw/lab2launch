@@ -39,6 +39,7 @@ If the work processes personal, health, or behavioural data:
 - GDPR special category data classification
 - Data Protection Impact Assessment (DPIA) requirement
 - Data residency and cross-border transfer constraints
+- ICO Guidelines
 
 If the work has dual-use potential (security, privacy attacks, surveillance, defence):
 - Responsible disclosure policy
