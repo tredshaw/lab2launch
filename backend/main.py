@@ -11,13 +11,16 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from starlette.requests import Request
 
+import admin
 import pdf_generator
 import prompts
+from metrics import metrics
 
 _VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
 _ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 app = FastAPI(title="Lab2Launch", version=_VERSION)
+app.include_router(admin.router)
 
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
@@ -189,6 +192,11 @@ def final_analysis(req: FinalAnalysisRequest):
         "follow_up_answers": [a.model_dump() for a in req.follow_up_answers],
         "result": result,
     }
+    metrics.record_analysis(
+        project_name=session["project_name"],
+        total_score=result.get("total_score"),
+        model=prompts.model_for("/final-analysis"),
+    )
 
     del _sessions[req.session_id]
     return {**result, "analysis_id": analysis_id}
