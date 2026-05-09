@@ -40,7 +40,7 @@ interface AnalysisResult {
 }
 
 interface Analysis {
-  id: number
+  id: number | string
   project_name: string
   created_at: string
   result: AnalysisResult
