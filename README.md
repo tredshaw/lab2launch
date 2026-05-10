@@ -4,6 +4,8 @@ A web app for early-stage technical founders to assess their investor readiness.
 
 The differentiator is BA methodology — POPIT, SWOT, and Stakeholder Analysis run inside the prompts, so the output is structured around real diligence frameworks rather than generic advice.
 
+**Accessible at: https://lab2launch.onrender.com**
+
 ![Lab2Launch results page](docs/screenshots/results-light-top.png)
 
 ---
