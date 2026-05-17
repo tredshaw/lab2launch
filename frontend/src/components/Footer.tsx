@@ -19,7 +19,7 @@ export default function Footer() {
           <h5>Product</h5>
           <ul>
             <li><Link to="/analyse">Run analysis</Link></li>
-//             <li><Link to="/#how">How it works</Link></li>
+            {/*<li><Link to="/#how">How it works</Link></li>*/}
           </ul>
         </div>
         <div>
@@ -27,22 +27,24 @@ export default function Footer() {
           <ul>
             <li><Link to="/analyse">For Founders</Link></li>
             <li><Link to="/analyse">For Researchers</Link></li>
-//             <li><Link to="/#about">About</Link></li>
+            {/*<li><Link to="/#about">About</Link></li>*/}
           </ul>
         </div>
-//         <div>
+        {/* <div>
 //           <h5>Company</h5>
 //           <ul>
 //             <li><a href="#">Manifesto</a></li>
 //             <li><a href="#">Contact</a></li>
 //             <li><a href="#">Terms · Privacy</a></li>
 //           </ul>
-//         </div>
+//         </div>*/}
       </div>
       <div className="site-foot-bottom">
         <span>© 2026 Lab²Launch</span>
-        <span>Disclaimer: Much of this copy is AI generated from real prompts and is being manually and consistently improved over time.</span>
         <span>v1.2 — Built in London</span>
+      </div>
+      <div className="site-foot-bottom">
+        <span>Disclaimer: Much of this copy is AI generated from real prompts and is being manually and consistently improved over time.</span>
       </div>
     </footer>
   )

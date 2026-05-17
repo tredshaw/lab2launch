@@ -63,16 +63,16 @@ export const landing = {
     label: 'The problem',
     titlePre: 'You can read the paper. ',
     titleEm: "But you can't write the deck.",
-    description: "Most deep-tech founders are exceptional scientists but inexperienced presenters. The investor pitch isn't a science problem — it's a translation problem. And every accelerator program punishes you for it.",
+    description: "Most deep-tech founders are exceptional scientists but inexperienced presenters. The investor pitch is usually a translation problem - they can sense your amazing research, but can't understand why to invest. And every accelerator program punishes you for it.",
     cells: [
       {
         title: 'What investors hear',
-        quote: "This is my interesting science, and here is how it works in detail.",
+        quote: "This is your interesting science, and here is how it works in detail - but I don't understand what problem you're solving?.",
         attribution: '— Some Investor Somewhere',
       },
       {
         title: 'What founders feel',
-        quote: "I've spent six years on this. Why is the panel asking about the real-world problem it solves and TAM?",
+        quote: "I've spent six years on this and I'm the first to do it. Why is the panel asking about the real-world problem it solves and TAM?",
         attribution: '— Some Founder Somewhere',
       },
     ],
