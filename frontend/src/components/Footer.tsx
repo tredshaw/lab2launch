@@ -42,9 +42,9 @@ export default function Footer() {
       <div className="site-foot-bottom">
         <span>© 2026 Lab²Launch</span>
         <span>v1.2 — Built in London</span>
-      </div>
-      <div className="site-foot-bottom">
-        <span>Disclaimer: Much of this copy is AI generated from real prompts and is being manually and consistently improved over time.</span>
+          <span style={{ display: 'block', marginTop: 10 }}>
+            Disclaimer: Much of this copy is AI generated from real prompts and is being manually and consistently improved over time.
+          </span>
       </div>
     </footer>
   )
