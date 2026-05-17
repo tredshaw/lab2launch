@@ -134,11 +134,11 @@ export const landing = {
     description: 'The gap analysis is structured, not narrative. Each dimension shows where you are, where you need to be, and what to do first.',
     caption: "AI Generated Sample · NovaCore Bioscaffold · v1.2",
     rows: [
-      { dimension: 'P · Problem Clarity', current: 'Pain described technically', target: 'Economic driver named, buyer identified', priority: 'high' as const },
-      { dimension: 'M · Market Evidence', current: 'Top-down TAM cited', target: 'Bottom-up build + 5 customer conversations', priority: 'high' as const },
-      { dimension: 'C · Competition', current: 'Incumbent products listed', target: 'Switching cost and moat articulated', priority: 'med' as const },
-      { dimension: 'T · Team', current: 'Academic pedigree strong', target: 'Commercial lead hired or committed', priority: 'med' as const },
-      { dimension: 'R · Risk', current: 'Regulatory pathway noted', target: 'GMP scaling risk named + mitigation plan', priority: 'low' as const },
+      { dimension: 'P · Problem Clarity', pop: 'P', current: 'Pain described technically', target: 'Economic driver named, buyer identified', priority: 'high' as const },
+      { dimension: 'M · Market Evidence', pop: 'M', current: 'Top-down TAM cited', target: 'Bottom-up build + 5 customer conversations', priority: 'high' as const },
+      { dimension: 'C · Competition', pop: 'C', current: 'Incumbent products listed', target: 'Switching cost and moat articulated', priority: 'med' as const },
+      { dimension: 'T · Team', pop: 'T', current: 'Academic pedigree strong', target: 'Commercial lead hired or committed', priority: 'med' as const },
+      { dimension: 'R · Risk', pop: 'R', current: 'Regulatory pathway noted', target: 'GMP scaling risk named + mitigation plan', priority: 'low' as const },
     ],
   },
 
