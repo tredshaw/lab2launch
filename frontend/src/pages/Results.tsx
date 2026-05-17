@@ -82,7 +82,7 @@ function DimCard({ name, dim }: { name: string; dim: Dimension }) {
           <Tag variant={PRIORITY_VARIANT[dim.priority]}>{dim.priority} priority</Tag>
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '1px solid var(--hairline)' }}>
+      <div className="dim-cols" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderBottom: '1px solid var(--hairline)' }}>
         {(['now', 'target', 'gap'] as const).map((col, i) => (
           <div key={col} style={{ padding: '16px 20px', borderLeft: i > 0 ? '1px solid var(--hairline)' : undefined }}>
             <span className="t-mono" style={{ display: 'block', marginBottom: 10, fontSize: 9 }}>
@@ -175,10 +175,10 @@ export default function Results() {
   return (
     <>
       <TopNav />
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 32px 96px' }}>
+      <div className="results-shell" style={{ maxWidth: 1100, margin: '0 auto', padding: '48px 32px 96px' }}>
 
         {/* Header */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 48, alignItems: 'start', marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid var(--hairline)' }}>
+        <div className="results-header" style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 48, alignItems: 'start', marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid var(--hairline)' }}>
           <div>
             <span className="t-mono" style={{ display: 'block', marginBottom: 8 }}>Gap analysis report</span>
             <h1 className="t-h2" style={{ marginBottom: 12 }}>{analysis.project_name || 'Untitled project'}</h1>
@@ -343,6 +343,14 @@ export default function Results() {
         @media (max-width: 900px) {
           .actions-grid { grid-template-columns: 1fr !important; }
           .dim-cols { grid-template-columns: 1fr !important; }
+          .results-header { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .results-header > div:last-child { text-align: left !important; }
+          .results-header > div:last-child > div { justify-content: flex-start !important; }
+        }
+        @media (max-width: 720px) {
+          .results-shell { padding: 32px 16px 64px !important; }
+          .results-shell .radar-svg-wrap { padding: 0 !important; }
+          .results-shell .radar-svg-wrap svg { max-width: 100%; height: auto; }
         }
       `}</style>
     </>

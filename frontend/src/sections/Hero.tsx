@@ -22,9 +22,6 @@ export default function Hero() {
             <Button variant="primary" size="lg" href={hero.primaryCta.href} arrow>
               {hero.primaryCta.label}
             </Button>
-            <Button variant="ghost" size="lg" href={hero.secondaryCta.href}>
-              {hero.secondaryCta.label}
-            </Button>
           </div>
         </div>
         <div className="hero-side">
@@ -86,7 +83,9 @@ export default function Hero() {
         .hero-meta-row:last-child { border-bottom: none; }
         .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
         @media (max-width: 900px) {
-          .hero-inner { grid-template-columns: 1fr !important; }
+          .hero-inner { grid-template-columns: 1fr !important; gap: 40px; }
+          .hero-inner .radar-svg-wrap { padding: 0 !important; }
+          .hero-inner .radar-svg-wrap svg { max-width: 100%; height: auto; }
         }
       `}</style>
     </section>

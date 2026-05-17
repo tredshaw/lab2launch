@@ -41,8 +41,10 @@
 .gp-l { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .gp-t { font-size: 14px; color: var(--ink); font-weight: 500; }
 @media (max-width: 900px) {
-  .analyse-shell { grid-template-columns: 1fr !important; }
+  .analyse-shell { grid-template-columns: 1fr !important; padding: 32px 16px 64px; gap: 0; }
   .analyse-side { position: static !important; display: none; }
   .stage-track { flex-wrap: wrap; }
+  .stage-pill { flex: 1 1 30%; }
   .goal-grid { grid-template-columns: 1fr !important; }
+  .form-nav { flex-wrap: wrap; gap: 12px; }
 }
