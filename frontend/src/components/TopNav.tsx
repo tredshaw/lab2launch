@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import SigmaSymbol from './SigmaSymbol'
 import Wordmark from './Wordmark'
 import Button from './Button'
@@ -29,14 +29,6 @@ function ThemeToggle() {
 }
 
 export default function TopNav() {
-  const location = useLocation()
-  const links = [
-    { to: '/', label: 'Home' },
-    { to: '/analyse', label: 'For Founders' },
-    { to: '/analyse', label: 'For Researchers' },
-    { to: '/#about', label: 'About' },
-  ]
-
   return (
     <nav className="site-nav">
       <div className="site-nav-inner">
@@ -44,17 +36,6 @@ export default function TopNav() {
           <SigmaSymbol size={22} stroke={2.6} />
           <Wordmark size="sm" />
         </Link>
-        <div className="site-nav-links">
-          {links.map(l => (
-            <Link
-              key={l.label}
-              to={l.to}
-              className={location.pathname === l.to ? 'active' : ''}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <ThemeToggle />
           <Button variant="primary" size="sm" href="/analyse" arrow>Run an analysis</Button>
