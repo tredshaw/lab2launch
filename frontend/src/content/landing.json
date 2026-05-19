@@ -1,8 +1,8 @@
 {
   "meta": {
-    "version": "v0.3",
-    "status": "Private beta",
-    "tagline": "Bench → Balance sheet"
+    "version": "v1.2",
+    "status": "Building in Public",
+    "tagline": "Lab2Launch"
   },
   "ticker": {
     "speed": 60,
@@ -19,7 +19,7 @@
       {
         "variant": "teal",
         "dot": true,
-        "text": "POPIT · People · 4 / 10"
+        "text": "POPIT"
       },
       {
         "variant": "amber",
@@ -28,7 +28,7 @@
       },
       {
         "variant": "muted",
-        "text": "Reports generated · 24/7"
+        "text": "Reports generated 24/7"
       },
       {
         "variant": "coral",
@@ -52,13 +52,13 @@
       },
       {
         "variant": "muted",
-        "text": "v1.2 · Building Publicly"
+        "text": "v1.2 · Building in Public"
       }
     ]
   },
   "hero": {
     "eyebrow": {
-      "tag": "v1.2 · Building Publicly",
+      "tag": "v1.2 · Building in Public",
       "variant": "signal"
     },
     "titlePre": "The readiness tool ",
