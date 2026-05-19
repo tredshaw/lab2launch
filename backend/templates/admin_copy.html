@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lab2Launch · Edit copy</title>
+<style>{% include "admin.css" %}</style>
+<style>
+  .copy-shell { max-width: 880px; margin: 0 auto; padding: 32px 24px 96px; }
+  .copy-section { margin-bottom: 32px; border: 1px solid var(--hairline, #e5e2da); border-radius: 6px; background: #fff; overflow: hidden; }
+  .copy-section > summary { padding: 16px 20px; cursor: pointer; font-weight: 600; font-size: 14px; background: #faf8f2; list-style: none; user-select: none; }
+  .copy-section > summary::-webkit-details-marker { display: none; }
+  .copy-section > summary::before { content: "▸ "; color: #888; }
+  .copy-section[open] > summary::before { content: "▾ "; }
+  .copy-body { padding: 20px; }
+  .copy-field { margin-bottom: 16px; }
+  .copy-field > label { display: block; font-family: ui-monospace, "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #666; margin-bottom: 6px; }
+  .copy-field > input, .copy-field > textarea {
+    width: 100%; padding: 10px 12px;
+    border: 1px solid var(--hairline-2, #ccc); border-radius: 4px;
+    font: 14px ui-sans-serif, system-ui, sans-serif; background: #fff; color: #111;
+  }
+  .copy-field > input:focus, .copy-field > textarea:focus { outline: 1px solid #111; outline-offset: -1px; }
+  .copy-field > textarea { resize: vertical; min-height: 80px; }
+  .copy-array-item { border: 1px dashed #d0cec5; border-radius: 4px; padding: 14px; margin-bottom: 12px; background: #fcfaf4; }
+  .copy-array-item-head { font-family: ui-monospace, monospace; font-size: 11px; color: #888; margin-bottom: 8px; }
+  .copy-nested { margin-top: 12px; padding-left: 16px; border-left: 2px solid #eee; }
+  .copy-toolbar {
+    position: sticky; top: 0; z-index: 10; background: #faf8f2;
+    border-bottom: 1px solid var(--hairline, #e5e2da);
+    padding: 16px 24px; margin: 0 -24px 24px;
+    display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  }
+  .copy-toolbar input[type=text] { flex: 1; max-width: 320px; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font: 14px ui-sans-serif, system-ui, sans-serif; }
+  .copy-toolbar .actions { display: flex; gap: 8px; align-items: center; }
+  .copy-status { font-size: 13px; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; }
+  .copy-status.ok { background: #ecf7ec; color: #1f5128; border: 1px solid #c2e0c4; }
+  .copy-status.err { background: #fde7e7; color: #781e1e; border: 1px solid #e8baba; }
+  .copy-status a { color: inherit; text-decoration: underline; }
+  .copy-warn { font-size: 13px; padding: 12px 16px; border-radius: 4px; margin-bottom: 16px; background: #fff3d6; color: #6b4d00; border: 1px solid #f0d57a; }
+</style>
+</head>
+<body>
+<header class="dash-head">
+  <div>
+    <span class="eyebrow">Lab2Launch</span>
+    <h1>Edit landing copy</h1>
+    <p class="muted">Saving opens a pull request against <code>{{ repo }}</code>. Changes go live after the PR is merged and Render redeploys.</p>
+  </div>
+  <div style="display:flex; gap:12px;">
+    <a href="/admin" class="btn-ghost">Back to admin</a>
+  </div>
+</header>
+
+<main class="copy-shell">
+
+{% if not github_configured %}
+<div class="copy-warn">
+  <strong>GITHUB_TOKEN is not set.</strong> The Save button will fail. Set a fine-grained PAT on the server with <em>Contents (read/write)</em> and <em>Pull requests (write)</em> scopes for <code>{{ repo }}</code>.
+</div>
+{% endif %}
+
+<div class="copy-toolbar">
+  <input id="note" type="text" placeholder="Optional note (appears in commit + PR title)" />
+  <div class="actions">
+    <button id="expand-all" class="btn-ghost" type="button">Expand all</button>
+    <button id="save" class="btn-ghost" type="button" style="background:#111; color:#fff; border-color:#111;">Save → open PR</button>
+  </div>
+</div>
+
+<div id="status"></div>
+<div id="form-root"></div>
+
+<script id="copy-data" type="application/json">{{ data_json | safe }}</script>
+<script>
+(function () {
+  const raw = document.getElementById('copy-data').textContent;
+  const data = JSON.parse(raw);
+  const root = document.getElementById('form-root');
+  const statusEl = document.getElementById('status');
+
+  function humanise(key) {
+    return key.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase()).trim();
+  }
+
+  // Build a form element for a primitive value. Returns the input element so
+  // we can read it back later. `path` is the dotted/indexed path; we attach it
+  // as data-path so the harvester can rebuild the tree.
+  function leafInput(path, value) {
+    const wrap = document.createElement('div');
+    wrap.className = 'copy-field';
+    const label = document.createElement('label');
+    label.textContent = path;
+    wrap.appendChild(label);
+
+    let el;
+    if (typeof value === 'string' && (value.length > 80 || value.includes('\n'))) {
+      el = document.createElement('textarea');
+      el.rows = Math.min(8, Math.max(2, Math.ceil(value.length / 80)));
+    } else {
+      el = document.createElement('input');
+      el.type = 'text';
+    }
+    el.value = value == null ? '' : String(value);
+    el.dataset.path = path;
+    el.dataset.type = typeof value === 'number' ? 'number'
+                    : typeof value === 'boolean' ? 'boolean'
+                    : 'string';
+    wrap.appendChild(el);
+    return wrap;
+  }
+
+  function isPlainObject(v) { return v !== null && typeof v === 'object' && !Array.isArray(v); }
+
+  // Render a value (object, array, or primitive) into the given container.
+  function renderValue(container, value, path) {
+    if (Array.isArray(value)) {
+      value.forEach((item, i) => {
+        const itemWrap = document.createElement('div');
+        itemWrap.className = 'copy-array-item';
+        const head = document.createElement('div');
+        head.className = 'copy-array-item-head';
+        head.textContent = `${path}[${i}]`;
+        itemWrap.appendChild(head);
+        renderValue(itemWrap, item, `${path}[${i}]`);
+        container.appendChild(itemWrap);
+      });
+    } else if (isPlainObject(value)) {
+      const nested = document.createElement('div');
+      nested.className = 'copy-nested';
+      Object.keys(value).forEach(k => {
+        const childPath = path ? `${path}.${k}` : k;
+        renderValue(nested, value[k], childPath);
+      });
+      container.appendChild(nested);
+    } else {
+      container.appendChild(leafInput(path, value));
+    }
+  }
+
+  // Top level: each top-level key becomes a collapsible <details> section.
+  Object.keys(data).forEach((section, idx) => {
+    const det = document.createElement('details');
+    det.className = 'copy-section';
+    if (idx === 0) det.open = true;
+    const sum = document.createElement('summary');
+    sum.textContent = humanise(section);
+    det.appendChild(sum);
+    const body = document.createElement('div');
+    body.className = 'copy-body';
+    renderValue(body, data[section], section);
+    det.appendChild(body);
+    root.appendChild(det);
+  });
+
+  document.getElementById('expand-all').addEventListener('click', () => {
+    const dets = root.querySelectorAll('details');
+    const allOpen = Array.from(dets).every(d => d.open);
+    dets.forEach(d => d.open = !allOpen);
+  });
+
+  // Parse a path like "ticker.items[3].text" into segments: ['ticker','items',3,'text']
+  function parsePath(p) {
+    const out = [];
+    p.split('.').forEach(part => {
+      const m = part.matchAll(/([^\[\]]+)|\[(\d+)\]/g);
+      for (const seg of m) {
+        if (seg[1] !== undefined) out.push(seg[1]);
+        else out.push(parseInt(seg[2], 10));
+      }
+    });
+    return out;
+  }
+
+  // Reconstruct the JSON object by reading every input/textarea with data-path,
+  // walking the original `data` tree to preserve nesting + any non-leaf
+  // structure that wasn't editable.
+  function harvest() {
+    const out = structuredClone(data);
+    root.querySelectorAll('[data-path]').forEach(el => {
+      const segs = parsePath(el.dataset.path);
+      let cursor = out;
+      for (let i = 0; i < segs.length - 1; i++) cursor = cursor[segs[i]];
+      const last = segs[segs.length - 1];
+      let v = el.value;
+      if (el.dataset.type === 'number') {
+        const n = Number(v);
+        v = Number.isFinite(n) ? n : v;
+      } else if (el.dataset.type === 'boolean') {
+        v = v === 'true' || v === '1';
+      }
+      cursor[last] = v;
+    });
+    return out;
+  }
+
+  document.getElementById('save').addEventListener('click', async () => {
+    statusEl.innerHTML = '';
+    const btn = document.getElementById('save');
+    btn.disabled = true;
+    const original = btn.textContent;
+    btn.textContent = 'Opening PR…';
+    try {
+      const content = harvest();
+      const note = document.getElementById('note').value.trim();
+      const res = await fetch('/admin/copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, note }),
+      });
+      if (!res.ok) {
+        const detail = await res.text();
+        throw new Error(detail || res.statusText);
+      }
+      const { pr_url } = await res.json();
+      statusEl.innerHTML = `<div class="copy-status ok">PR opened: <a href="${pr_url}" target="_blank" rel="noreferrer">${pr_url}</a>. Merge it and Render will redeploy.</div>`;
+    } catch (e) {
+      statusEl.innerHTML = `<div class="copy-status err">${(e && e.message) || e}</div>`;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = original;
+    }
+  });
+})();
+</script>
+
+</main>
+</body>
+</html>

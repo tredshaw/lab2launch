@@ -9,13 +9,16 @@ on server restart, by design — see metrics.py.
 """
 from __future__ import annotations
 
+import base64
+import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Set
+from typing import Any, Optional, Set
 
-from fastapi import APIRouter, Cookie, Form, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+import httpx
+from fastapi import APIRouter, Body, Cookie, Form, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -31,6 +34,11 @@ _SECRET = os.getenv("SESSION_SECRET", "dev-only-not-secret")
 _RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 _PUBLIC_URL = os.getenv("PUBLIC_URL", "http://127.0.0.1:8000")
 _FROM_ADDRESS = os.getenv("ADMIN_FROM", "Lab2Launch <noreply@lab2launch.app>")
+_GH_TOKEN = os.getenv("GITHUB_TOKEN", "")
+_GH_REPO = os.getenv("GITHUB_REPO", "tredshaw/lab2launch")
+_GH_BASE_BRANCH = os.getenv("GITHUB_BASE_BRANCH", "main")
+_COPY_PATH = "frontend/src/content/landing.json"
+_LOCAL_COPY_FILE = Path(__file__).parent.parent / _COPY_PATH
 
 _token_serializer = URLSafeTimedSerializer(_SECRET, salt="lab2launch-magic")
 _session_serializer = URLSafeTimedSerializer(_SECRET, salt="lab2launch-session")
@@ -170,3 +178,120 @@ def admin_logout():
     resp = RedirectResponse(url="/admin", status_code=303)
     resp.delete_cookie(SESSION_COOKIE)
     return resp
+
+
+# ----- Copy editor ----------------------------------------------------------
+
+@router.get("/admin/copy", response_class=HTMLResponse, include_in_schema=False)
+def admin_copy_editor(
+    session: Optional[str] = Cookie(default=None, alias=SESSION_COOKIE),
+):
+    if not _is_authed(session):
+        return RedirectResponse(url="/admin", status_code=303)
+    try:
+        current = json.loads(_LOCAL_COPY_FILE.read_text())
+    except FileNotFoundError:
+        current = {}
+    tmpl = _jinja.get_template("admin_copy.html")
+    return HTMLResponse(tmpl.render(
+        data_json=json.dumps(current, indent=2, ensure_ascii=False),
+        repo=_GH_REPO,
+        github_configured=bool(_GH_TOKEN),
+    ))
+
+
+@router.post("/admin/copy", include_in_schema=False)
+def admin_copy_save(
+    payload: dict = Body(...),
+    session: Optional[str] = Cookie(default=None, alias=SESSION_COOKIE),
+):
+    if not _is_authed(session):
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    if not _GH_TOKEN:
+        raise HTTPException(
+            status_code=500,
+            detail="GITHUB_TOKEN is not configured on the server. Set it to a fine-grained PAT with Contents (read/write) and Pull requests (write) scopes for the repo.",
+        )
+
+    new_content = payload.get("content")
+    note = (payload.get("note") or "").strip()
+    if not isinstance(new_content, dict):
+        raise HTTPException(status_code=400, detail="`content` must be a JSON object")
+
+    new_json = json.dumps(new_content, indent=2, ensure_ascii=False) + "\n"
+    try:
+        return JSONResponse(_open_copy_pr(new_json, note))
+    except httpx.HTTPStatusError as e:
+        body = e.response.text[:500]
+        raise HTTPException(status_code=502, detail=f"GitHub API error {e.response.status_code}: {body}")
+
+
+def _gh_headers() -> dict:
+    return {
+        "Authorization": f"Bearer {_GH_TOKEN}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+
+def _open_copy_pr(new_json: str, note: str) -> dict:
+    """Create a branch off main, commit the new landing.json, open a PR.
+
+    Returns {"pr_url": str, "branch": str}.
+    """
+    api = "https://api.github.com"
+    branch = f"admin/copy-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
+    with httpx.Client(timeout=30.0, headers=_gh_headers()) as c:
+        # 1. Get the SHA of main
+        r = c.get(f"{api}/repos/{_GH_REPO}/git/ref/heads/{_GH_BASE_BRANCH}")
+        r.raise_for_status()
+        base_sha = r.json()["object"]["sha"]
+
+        # 2. Create the new branch
+        r = c.post(
+            f"{api}/repos/{_GH_REPO}/git/refs",
+            json={"ref": f"refs/heads/{branch}", "sha": base_sha},
+        )
+        r.raise_for_status()
+
+        # 3. Look up the existing file SHA on the base branch (required to update)
+        r = c.get(
+            f"{api}/repos/{_GH_REPO}/contents/{_COPY_PATH}",
+            params={"ref": _GH_BASE_BRANCH},
+        )
+        if r.status_code == 404:
+            existing_sha = None
+        else:
+            r.raise_for_status()
+            existing_sha = r.json().get("sha")
+
+        # 4. Commit the new file content to the branch
+        commit_msg = "admin: update landing copy" + (f"\n\n{note}" if note else "")
+        put_body: dict[str, Any] = {
+            "message": commit_msg,
+            "content": base64.b64encode(new_json.encode("utf-8")).decode("ascii"),
+            "branch": branch,
+        }
+        if existing_sha:
+            put_body["sha"] = existing_sha
+        r = c.put(f"{api}/repos/{_GH_REPO}/contents/{_COPY_PATH}", json=put_body)
+        r.raise_for_status()
+
+        # 5. Open the PR
+        pr_title = "Update landing copy" + (f" — {note[:60]}" if note else "")
+        pr_body = (
+            "Generated from the /admin/copy editor."
+            + (f"\n\n**Notes:** {note}" if note else "")
+        )
+        r = c.post(
+            f"{api}/repos/{_GH_REPO}/pulls",
+            json={
+                "title": pr_title,
+                "head": branch,
+                "base": _GH_BASE_BRANCH,
+                "body": pr_body,
+            },
+        )
+        r.raise_for_status()
+        pr = r.json()
+        return {"pr_url": pr["html_url"], "branch": branch}
