@@ -132,7 +132,7 @@ Single Render web service defined in `render.yaml` at the repo root. The build:
 
 The runtime serves both the API and the SPA: when `ENVIRONMENT=production` and `frontend/dist` exists, FastAPI mounts `dist/assets` and falls through unmatched GETs to `index.html` so React Router can take over. In dev, Vite handles the frontend on :5173.
 
-Required Render env vars (set in the dashboard, not in `render.yaml`): `ANTHROPIC_API_KEY`, `SESSION_SECRET`, `RESEND_API_KEY`. Optional: `MODEL_FIRST_PASS`, `MODEL_FINAL`, `PUBLIC_URL`.
+Required Render env vars (set in the dashboard, not in `render.yaml`): `ANTHROPIC_API_KEY`, `SESSION_SECRET`, `RESEND_API_KEY`. Optional: `MODEL_FIRST_PASS`, `MODEL_FINAL`, `PUBLIC_URL`, `GITHUB_TOKEN`, `GITHUB_REPO`, `GITHUB_BASE_BRANCH` (only needed for the `/admin/copy` editor).
 
 ---
 

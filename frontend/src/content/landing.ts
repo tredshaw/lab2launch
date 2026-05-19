@@ -1,3 +1,4 @@
+import data from './landing.json'
 export const landing = {
   meta: {
     version: 'v0.3',
@@ -233,4 +234,5 @@ export const landing = {
   },
 }
 
+export const landing = data
 export type LandingContent = typeof landing
