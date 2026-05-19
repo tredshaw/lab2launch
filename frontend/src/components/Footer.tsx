@@ -12,37 +12,37 @@ export default function Footer() {
             <Wordmark size="md" />
           </Link>
           <p className="t-body" style={{ marginTop: 16, maxWidth: 320 }}>
-            The readiness instrument that gets researchers from bench to balance sheet.
+            The readiness instrument that gets researchers from lab-bench to Series B.
           </p>
         </div>
         <div>
           <h5>Product</h5>
           <ul>
             <li><Link to="/analyse">Run analysis</Link></li>
-            <li><Link to="/#sample">Sample report</Link></li>
-            <li><Link to="/#how">How it works</Link></li>
+            {/*<li><Link to="/#how">How it works</Link></li>*/}
           </ul>
         </div>
         <div>
           <h5>For You</h5>
           <ul>
-            <li><Link to="/analyse">Founders</Link></li>
-            <li><Link to="/analyse">Researchers</Link></li>
-            <li><Link to="/#about">About</Link></li>
+            <li><Link to="/analyse">For Founders</Link></li>
+            <li><Link to="/analyse">For Researchers</Link></li>
+            {/*<li><Link to="/#about">About</Link></li>*/}
           </ul>
         </div>
-        <div>
-          <h5>Company</h5>
-          <ul>
-            <li><a href="#">Manifesto</a></li>
-            <li><a href="#">Contact</a></li>
-            <li><a href="#">Terms · Privacy</a></li>
-          </ul>
-        </div>
+        {/* <div>
+//           <h5>Company</h5>
+//           <ul>
+//             <li><a href="#">Manifesto</a></li>
+//             <li><a href="#">Contact</a></li>
+//             <li><a href="#">Terms · Privacy</a></li>
+//           </ul>
+//         </div>*/}
       </div>
       <div className="site-foot-bottom">
         <span>© 2026 Lab²Launch</span>
-        <span>v0.3 — Built in London</span>
+        <span>v1.2 — Built in London</span>
+        <span>Disclaimer: Much of this copy is AI generated from real prompts and is being manually improved regularly.</span>
       </div>
     </footer>
   )
