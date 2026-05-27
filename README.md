@@ -12,7 +12,7 @@ The differentiator is BA methodology — POPIT, SWOT, and Stakeholder Analysis r
 
 ## Live demo
 
-[`<replace with the Render URL once deployed>`](https://lab2launch.onrender.com**)
+[`Live Demo`](https://lab2launch.onrender.com)
 
 The free tier sleeps after 15 minutes of inactivity, so the first visit can take ~30 seconds to wake up. Subsequent requests are instant.
 
