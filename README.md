@@ -1,8 +1,8 @@
 # Lab2Launch
 
-A web app for early-stage technical founders to assess their investor readiness. Fill in a structured form, answer a few clarifying questions, get a scored gap analysis with a five-dimension breakdown and a downloadable PDF.
+A web app for early-stage technical founders to assess their investor readiness. Fill in a structured form, answer a few clarifying questions, and receive a scored gap analysis with a five-dimension breakdown and a downloadable PDF.
 
-The differentiator is BA methodology — POPIT, SWOT, and Stakeholder Analysis run inside the prompts, so the output is structured around real diligence frameworks rather than generic advice.
+The differentiator is BA methodology — POPIT, SWOT, and Stakeholder Analysis run inside the prompts, so the output is structured around real frameworks rather than generic advice.
 
 **Accessible at: https://lab2launch.onrender.com**
 
@@ -12,7 +12,7 @@ The differentiator is BA methodology — POPIT, SWOT, and Stakeholder Analysis r
 
 ## Live demo
 
-`<replace with the Render URL once deployed>`
+[`<replace with the Render URL once deployed>`](https://lab2launch.onrender.com**)
 
 The free tier sleeps after 15 minutes of inactivity, so the first visit can take ~30 seconds to wake up. Subsequent requests are instant.
 
